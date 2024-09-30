@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "G:\\cw2\\DENMAP_SERVER\\DENMAP_SERVER.csproj": {}
+    "C:\\Users\\CC\\Documents\\git\\my-app\\Back-end\\DENMAP_SERVER.csproj": {}
   },
   "projects": {
-    "G:\\cw2\\DENMAP_SERVER\\DENMAP_SERVER.csproj": {
+    "C:\\Users\\CC\\Documents\\git\\my-app\\Back-end\\DENMAP_SERVER.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "G:\\cw2\\DENMAP_SERVER\\DENMAP_SERVER.csproj",
+        "projectUniqueName": "C:\\Users\\CC\\Documents\\git\\my-app\\Back-end\\DENMAP_SERVER.csproj",
         "projectName": "DENMAP_SERVER",
-        "projectPath": "G:\\cw2\\DENMAP_SERVER\\DENMAP_SERVER.csproj",
+        "projectPath": "C:\\Users\\CC\\Documents\\git\\my-app\\Back-end\\DENMAP_SERVER.csproj",
         "packagesPath": "C:\\Users\\CC\\.nuget\\packages\\",
-        "outputPath": "G:\\cw2\\DENMAP_SERVER\\obj\\",
+        "outputPath": "C:\\Users\\CC\\Documents\\git\\my-app\\Back-end\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\CC\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -40,6 +40,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
             "Nancy": {
               "target": "Package",
               "version": "[2.0.0, )"
