@@ -4,24 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DENMAP_SERVER.Entity
+namespace DENMAP_SERVER.Entity.dto
 {
-    internal class Comment
+    internal class CommentDTO
     {
         public int Id { get; set; }
-        public int UserId { get; set; }
+        public User User { get; set; }
         public double Rating { get; set; }
         public string Message { get; set; }
-        public int PostId { get; set; }
+        public Post Post { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public Comment(int id, int userId, double rating, string message, int postId, DateTime createdAt)
+        public CommentDTO(int id, User user, double rating, string message, Post post, DateTime createdAt)
         {
             Id = id;
-            UserId = userId;
+            User = user;
             Rating = rating;
             Message = message;
-            PostId = postId;
+            Post = post;
             CreatedAt = createdAt;
         }
     }

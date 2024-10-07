@@ -10,14 +10,17 @@ namespace DENMAP_SERVER.Repository
 {
     internal class UserRepository
     {
-        public int addUser(MySqlConnection connection, string name, string password)
+        public int addUser(MySqlConnection connection, string name, string password, byte[] image, string description)
         {
-            string query = $"INSERT INTO users (name, password) VALUES (@name, @password); SELECT LAST_INSERT_ID();";
+            string query = $"INSERT INTO users (name, password, image, rating, description) VALUES (@name, @password, @image, @rating, @description); SELECT LAST_INSERT_ID();";
             int id = 0;
             using (MySqlCommand cmd = new MySqlCommand(query, connection))
             {
                 cmd.Parameters.AddWithValue("@Name", name);
                 cmd.Parameters.AddWithValue("@password", password);
+                cmd.Parameters.AddWithValue("@image", image);
+                cmd.Parameters.AddWithValue("@rating", 0);
+                cmd.Parameters.AddWithValue("@description", description);
                 id = Convert.ToInt32(cmd.ExecuteScalar());
             }
             return id;
@@ -36,12 +39,18 @@ namespace DENMAP_SERVER.Repository
                 cmd.Parameters.AddWithValue("@name", name);
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    while (reader.Read())
+                    if (reader.Read())
                     {
+                        byte[] image = (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null;
+
                         user = new User(
                             Convert.ToInt32(reader["id"]),
                             Convert.ToString(reader["name"]),
-                            Convert.ToString(reader["password"]));
+                            Convert.ToString(reader["password"]),
+                            image,
+                            Convert.ToDouble(reader["rating"]),
+                            Convert.ToString(reader["description"])
+                        );
                     }
                 }
             }
@@ -60,23 +69,32 @@ namespace DENMAP_SERVER.Repository
                 cmd.Parameters.AddWithValue("@Id", id);
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    while (reader.Read())
+                    if (reader.Read())
                     {
+                        byte[] image = (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null;
+
                         user = new User(
                             Convert.ToInt32(reader["id"]),
                             Convert.ToString(reader["name"]),
-                            Convert.ToString(reader["password"]));
+                            Convert.ToString(reader["password"]),
+                            image,
+                            Convert.ToDouble(reader["rating"]),
+                            Convert.ToString(reader["description"])
+                        );
                     }
                 }
             }
             return user;
         }
 
-        public int updateUser(MySqlConnection connection, int id, string name, string password)
+        public int updateUser(MySqlConnection connection, int id, string name, string password, byte[] image, double rating, string description)
         {
             string query = $"UPDATE users " +
                            $"SET name = @Name, " +
                                $"password = @Password, " +
+                               $"image = @Image " +
+                               $"rating = @Rating, " +
+                               $"description = @Description " +
                            $"WHERE id = @Id";
 
             int result = 0;
@@ -84,6 +102,9 @@ namespace DENMAP_SERVER.Repository
             {
                 cmd.Parameters.AddWithValue("@Name", name);
                 cmd.Parameters.AddWithValue("@Password", password);
+                cmd.Parameters.AddWithValue("@Image", image);
+                cmd.Parameters.AddWithValue("@Rating", rating);
+                cmd.Parameters.AddWithValue("@Description", description);
                 cmd.Parameters.AddWithValue("@Id", id);
 
                 result = cmd.ExecuteNonQuery();
@@ -105,10 +126,15 @@ namespace DENMAP_SERVER.Repository
                 {
                     while (reader.Read())
                     {
+                        byte[] image = (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null;
+
                         User user = new User(
                             Convert.ToInt32(reader["id"]),
                             Convert.ToString(reader["name"]),
-                            Convert.ToString(reader["password"])
+                            Convert.ToString(reader["password"]),
+                            image,
+                            Convert.ToDouble(reader["rating"]),
+                            Convert.ToString(reader["description"])
                         );
                         users.Add(user);
                     }
@@ -120,4 +146,4 @@ namespace DENMAP_SERVER.Repository
 
     }
 }
-}
+
