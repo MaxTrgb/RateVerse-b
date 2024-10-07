@@ -1,4 +1,4 @@
-﻿using DENMAP_SERVER.Entity;
+using DENMAP_SERVER.Entity;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;

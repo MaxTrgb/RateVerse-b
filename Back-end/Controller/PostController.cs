@@ -1,4 +1,4 @@
-﻿using DENMAP_SERVER.Entity.dto;
+using DENMAP_SERVER.Entity.dto;
 using DENMAP_SERVER.Entity;
 using DENMAP_SERVER.Service;
 using Nancy;
