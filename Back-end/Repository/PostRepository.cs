@@ -167,5 +167,37 @@ namespace DENMAP_SERVER.Repository
             }
             return result;
         }
+
+        public double getPostRating(MySqlConnection connection, int id)
+        {
+            double rating = null;
+            string query = $"SELECT rating " +
+                           $"FROM posts " +
+                           $"WHERE id = @Id";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, connection))
+            {
+                cmd.Parameters.AddWithValue("@Id", id);
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        byte[] image = (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null;
+
+                        rating = new Post(
+                            Convert.ToInt32(reader["id"]),
+                            Convert.ToInt32(reader["user_id"]),
+                            Convert.ToString(reader["title"]),
+                            image,
+                            Convert.ToString(reader["content"]),
+                            Convert.ToDouble(reader["rating"]),
+                            Convert.ToDateTime(reader["created_at"])
+                        );
+
+                    }
+                }
+            }
+            return rating;
+        }
     }
 }
