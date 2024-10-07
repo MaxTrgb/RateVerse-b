@@ -96,17 +96,17 @@ namespace DENMAP_SERVER.Controller
 
             Post(_basePath + "/", args =>
             {
-                string name;
-                string password;
+                int userId;
+                string title;
                 byte[] image;
-                string description;
+                string content;
 
                 try
                 {
-                    name = this.Bind<string>("name");
-                    password = this.Bind<string>("password");
+                    userId = this.Bind<int>("userId");
+                    title = this.Bind<string>("title");
                     image = this.Bind<byte[]>("image");
-                    description = this.Bind<string>("description");
+                    content = this.Bind<string>("content");
                 }
                 catch (Exception e)
                 {
@@ -115,13 +115,36 @@ namespace DENMAP_SERVER.Controller
 
                 try
                 {
-                    int userId = _userService.RegisterUser(name, password, image, description);
-                    return Response.AsJson(new { message = userId }, HttpStatusCode.Created);
+                    int postId = _postService.AddPost(userId, title, image, content);
+                    return Response.AsJson(new { message = postId }, HttpStatusCode.Created);
                 }
                 catch (Exception e)
                 {
                     return Response.AsJson(new { message = e.Message }, HttpStatusCode.BadRequest);
                 }
+            });
+
+            Get(_basePath + "/", args =>
+            {
+                int? id = (int?)this.Request.Query["userId"];
+
+                if (!id.HasValue)
+                    return Response.AsJson(new { message = "Missing id parameter" }, HttpStatusCode.BadRequest);
+
+                List<Post> posts = _postService.GetPostsByUserId(id.Value);
+                if (posts != null)
+                    return Response.AsJson(new { message = "Posts not found" }, HttpStatusCode.NotFound);
+
+                User user = _userService.GetUserById(posts[0].UserId);
+                if (user != null)
+                    return Response.AsJson(new { message = "User not found" }, HttpStatusCode.NotFound);
+
+                List<PostDTO> postDTOs = new List<PostDTO>();
+
+                foreach (Post post in posts)
+                    postDTOs.Add(new PostDTO(post, user));
+
+                return Response.AsJson(user);
             });
         }
     }

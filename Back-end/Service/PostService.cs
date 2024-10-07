@@ -137,5 +137,18 @@ namespace DENMAP_SERVER.Service
 
             return result;
         }
+
+        public double GetPostRating(int id)
+        {
+            double rating = 0;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    rating = postRepository.getPostRating(connection, id);
+                }
+            }
+        }
     }
 }
