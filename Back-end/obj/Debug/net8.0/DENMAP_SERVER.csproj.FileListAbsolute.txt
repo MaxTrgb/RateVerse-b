@@ -20,3 +20,12 @@ G:\cw2\DENMAP_SERVER\obj\Debug\net8.0\refint\DENMAP_SERVER.dll
 G:\cw2\DENMAP_SERVER\obj\Debug\net8.0\DENMAP_SERVER.pdb
 G:\cw2\DENMAP_SERVER\obj\Debug\net8.0\DENMAP_SERVER.genruntimeconfig.cache
 G:\cw2\DENMAP_SERVER\obj\Debug\net8.0\ref\DENMAP_SERVER.dll
+C:\Users\CC\Documents\git\my-app\Back-end\obj\Debug\net8.0\DENMAP_SERVER.csproj.AssemblyReference.cache
+C:\Users\CC\Documents\git\my-app\Back-end\obj\Debug\net8.0\DENMAP_SERVER.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\CC\Documents\git\my-app\Back-end\obj\Debug\net8.0\DENMAP_SERVER.AssemblyInfoInputs.cache
+C:\Users\CC\Documents\git\my-app\Back-end\obj\Debug\net8.0\DENMAP_SERVER.AssemblyInfo.cs
+C:\Users\CC\Documents\git\my-app\Back-end\obj\Debug\net8.0\DENMAP_SERVER.csproj.CoreCompileInputs.cache
+C:\Users\CC\Documents\git\my-app\Back-end\obj\Debug\net8.0\DENMAP_SERVER.sourcelink.json
+C:\Users\CC\Documents\git\my-app\Back-end\obj\Debug\net8.0\DENMAP_SERVER.dll
+C:\Users\CC\Documents\git\my-app\Back-end\obj\Debug\net8.0\refint\DENMAP_SERVER.dll
+C:\Users\CC\Documents\git\my-app\Back-end\obj\Debug\net8.0\DENMAP_SERVER.pdb

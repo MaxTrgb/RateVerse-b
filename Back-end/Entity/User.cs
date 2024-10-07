@@ -11,14 +11,12 @@ namespace DENMAP_SERVER.Entity
         public int Id { get; set; }
         public string Name { get; set; }
         public string Password { get; set; }
-        public string Image { get; set; }
+        public byte[] Image { get; set; }
         public double Rating { get; set; }
         public string Description { get; set; }
-        public HashSet<Comment> Comments { get; set; }
-        public HashSet<Post> Posts { get; set; }
 
 
-        public User(int id, string name, string password, string image, double rating, string description, HashSet<Comment> comments, HashSet<Post> posts)
+        public User(int id, string name, string password, byte[] image, double rating, string description)
         {
             Id = id;
             Name = name;
@@ -26,8 +24,6 @@ namespace DENMAP_SERVER.Entity
             Image = image;
             Rating = rating;
             Description = description;
-            Comments = comments;
-            Posts = posts;
         }
     }
 }
