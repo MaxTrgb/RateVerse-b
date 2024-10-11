@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace DENMAP_SERVER.Controller
 {
-    internal class UserController : NancyModule
+    public class UserController : NancyModule
     {
         private UserService _userService = new UserService();
         private PostService _postService = new PostService();
         private CommentService _commentService = new CommentService();
 
-        private readonly string _basePath = "/api/user";
+        private string _basePath = "/api/v1/user";
 
         public UserController()
         {
@@ -29,14 +29,17 @@ namespace DENMAP_SERVER.Controller
                 try
                 {
                     User user = _userService.GetUserById(id);
+                    Console.WriteLine("user: " + user);
 
                     List<Comment> comments = _commentService.GetCommentsByUserId(id);
+                    Console.WriteLine("comments: " + comments);
 
                     List<Post> posts = _postService.GetPostsByUserId(id);
+                    Console.WriteLine("posts: " + posts);
 
                     return Response.AsJson(new UserDTO(user, comments, posts));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return Response.AsJson(new { message = ex.Message }, HttpStatusCode.NotFound);
                 }

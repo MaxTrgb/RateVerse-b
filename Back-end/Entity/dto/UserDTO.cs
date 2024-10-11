@@ -11,14 +11,14 @@ namespace DENMAP_SERVER.Entity.dto
         public int Id { get; set; }
         public string Name { get; set; }
         public string Password { get; set; }
-        public byte[] Image { get; set; }
+        public string Image { get; set; }
         public double Rating { get; set; }
         public string Description { get; set; }
         public List<Comment> Comments { get; set; }
         public List<Post> Posts { get; set; }
 
 
-        public UserDTO(int id, string name, string password, byte[] image, double rating, string description, List<Comment> comments, List<Post> posts)
+        public UserDTO(int id, string name, string password, string image, double rating, string description, List<Comment> comments, List<Post> posts)
         {
             Id = id;
             Name = name;

@@ -1,4 +1,4 @@
-﻿using DENMAP_SERVER.Entity;
+using DENMAP_SERVER.Entity;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ namespace DENMAP_SERVER.Repository
 {
     internal class PostRepository
     {
-        public int addPost(MySqlConnection connection, int userId, string title, byte[] image, string content, double rating, DateTime createdAt)
+        public int addPost(MySqlConnection connection, int userId, string title, string image, string content, double rating, DateTime createdAt)
         {
             string query = $"INSERT INTO posts (user_id, title, image, content, rating, created_at) VALUES (@userId, @title, @image, @content, @rating, @createdAt); SELECT LAST_INSERT_ID();";
             int id = 0;
@@ -42,13 +42,12 @@ namespace DENMAP_SERVER.Repository
                 {
                     while (reader.Read())
                     {
-                        byte[] image = (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null;
 
                         Post post = new Post(
                             Convert.ToInt32(reader["id"]),
                             Convert.ToInt32(reader["user_id"]),
                             Convert.ToString(reader["title"]),
-                            image,
+                            Convert.ToString(reader["image"]),
                             Convert.ToString(reader["content"]),
                             Convert.ToDouble(reader["rating"]),
                             Convert.ToDateTime(reader["created_at"])
@@ -58,6 +57,8 @@ namespace DENMAP_SERVER.Repository
                     }
                 }
             }
+            Console.WriteLine(posts.Count);
+            Console.WriteLine(posts[0].ToString());
             return posts;
         }
 
@@ -75,18 +76,24 @@ namespace DENMAP_SERVER.Repository
                 {
                     while (reader.Read())
                     {
-                        byte[] image = (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null;
 
                         post = new Post(
                             Convert.ToInt32(reader["id"]),
                             Convert.ToInt32(reader["user_id"]),
                             Convert.ToString(reader["title"]),
-                            image,
+                            Convert.ToString(reader["image"]),
                             Convert.ToString(reader["content"]),
                             Convert.ToDouble(reader["rating"]),
                             Convert.ToDateTime(reader["created_at"])
                         );
-
+                        Console.WriteLine("id:" + Convert.ToInt32(reader["id"]) +
+                            " user_id: " + Convert.ToInt32(reader["user_id"]) +
+                            " title: " + Convert.ToString(reader["title"]) +
+                            " image: " + Convert.ToString(reader["image"]) +
+                            " content: " + Convert.ToString(reader["content"]) +
+                            " rating: " + Convert.ToDouble(reader["rating"]) +
+                            " created_at: " + Convert.ToDateTime(reader["created_at"]));
+                        Console.WriteLine("id:" + post.Id + " user_id: " + post.UserId + " title: " + post.Title + " image: " + post.Image + " content: " + post.Content + " rating: " + post.Rating + " created_at: " + post.CreatedAt);
                     }
                 }
             }
@@ -105,13 +112,12 @@ namespace DENMAP_SERVER.Repository
                 {
                     while (reader.Read())
                     {
-                        byte[] image = (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null;
 
                         Post post = new Post(
                             Convert.ToInt32(reader["id"]),
                             Convert.ToInt32(reader["user_id"]),
                             Convert.ToString(reader["title"]),
-                            image,
+                            Convert.ToString(reader["image"]),
                             Convert.ToString(reader["content"]),
                             Convert.ToDouble(reader["rating"]),
                             Convert.ToDateTime(reader["created_at"])
@@ -124,7 +130,7 @@ namespace DENMAP_SERVER.Repository
             return posts;
         }
 
-        public int updatePost(MySqlConnection connection, int id, int userId, string title, byte[] image, string content, double rating, DateTime createdAt)
+        public int updatePost(MySqlConnection connection, int id, int userId, string title, string image, string content, double rating, DateTime createdAt)
         {
             string query = $"UPDATE posts " +
                            $"SET user_id = @userId, " +
@@ -166,6 +172,30 @@ namespace DENMAP_SERVER.Repository
                 result = cmd.ExecuteNonQuery();
             }
             return result;
+        }
+
+        public double getPostRating(MySqlConnection connection, int id)
+        {
+            double rating = 0.0;
+            string query = $"SELECT rating " +
+                           $"FROM posts " +
+                           $"WHERE id = @Id";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, connection))
+            {
+                cmd.Parameters.AddWithValue("@Id", id);
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        if (!reader.IsDBNull(reader.GetOrdinal("rating")))
+                        {
+                            rating = Convert.ToDouble(reader["rating"]);
+                        }
+                    }
+                }
+            }
+            return rating;
         }
     }
 }

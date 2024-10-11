@@ -14,8 +14,9 @@ namespace DENMAP_SERVER.Service
         string connectionString = "Server=34.116.253.154;Port=3306;Database=chat_database;Uid=app_user;Pwd=&X9fT#7vYqZ$4LpR;";
 
         private UserRepository userRepository = new UserRepository();
+        private PostRepository postRepository = new PostRepository();
 
-        public int RegisterUser(string username, string password, byte[] image, string description)
+        public int RegisterUser(string username, string password, string image, string description)
         {
             int id = 0;
             User user = null;
@@ -158,7 +159,7 @@ namespace DENMAP_SERVER.Service
         }
 
 
-        public int updateUser(int id, string name, string password, byte[] image, double rating, string description)
+        public int updateUser(int id, string name, string password, string image, double rating, string description)
         {
             User user = GetUserById(id);
 
@@ -175,6 +176,52 @@ namespace DENMAP_SERVER.Service
                     throw new Exception("Database error.\nError:" + ex.Message);
                 }
             }
+        }
+
+        public int UpdateUserRating(int id, double rating)
+        {
+            int result = 0;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                try
+                {
+                    result = userRepository.updateUserRating(connection, id, rating);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Database error.\nError:" + ex.Message);
+                }
+            }
+
+            return result;
+        }
+        public void ReCalculateUserRating(int id)
+        {
+            double rating = 0;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                try
+                {
+                    List<Post> posts = postRepository.getPostsByUserID(connection, id);
+                    foreach (Post comment in posts)
+                    {
+                        rating += comment.Rating;
+                    }
+                    rating /= posts.Count;
+
+
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Database error.\nError:" + ex.Message);
+                }
+            }
+
+            UpdateUserRating(id, rating); ;
         }
     }
 }

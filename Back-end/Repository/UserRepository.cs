@@ -10,7 +10,7 @@ namespace DENMAP_SERVER.Repository
 {
     internal class UserRepository
     {
-        public int addUser(MySqlConnection connection, string name, string password, byte[] image, string description)
+        public int addUser(MySqlConnection connection, string name, string password, string image, string description)
         {
             string query = $"INSERT INTO users (name, password, image, rating, description) VALUES (@name, @password, @image, @rating, @description); SELECT LAST_INSERT_ID();";
             int id = 0;
@@ -41,13 +41,13 @@ namespace DENMAP_SERVER.Repository
                 {
                     if (reader.Read())
                     {
-                        byte[] image = (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null;
+                        
 
                         user = new User(
                             Convert.ToInt32(reader["id"]),
                             Convert.ToString(reader["name"]),
                             Convert.ToString(reader["password"]),
-                            image,
+                            Convert.ToString(reader["image"]),
                             Convert.ToDouble(reader["rating"]),
                             Convert.ToString(reader["description"])
                         );
@@ -71,13 +71,13 @@ namespace DENMAP_SERVER.Repository
                 {
                     if (reader.Read())
                     {
-                        byte[] image = (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null;
+                        
 
                         user = new User(
                             Convert.ToInt32(reader["id"]),
                             Convert.ToString(reader["name"]),
                             Convert.ToString(reader["password"]),
-                            image,
+                            Convert.ToString(reader["image"]),
                             Convert.ToDouble(reader["rating"]),
                             Convert.ToString(reader["description"])
                         );
@@ -87,7 +87,7 @@ namespace DENMAP_SERVER.Repository
             return user;
         }
 
-        public int updateUser(MySqlConnection connection, int id, string name, string password, byte[] image, double rating, string description)
+        public int updateUser(MySqlConnection connection, int id, string name, string password, string image, double rating, string description)
         {
             string query = $"UPDATE users " +
                            $"SET name = @Name, " +
@@ -115,6 +115,7 @@ namespace DENMAP_SERVER.Repository
         public List<User> GetUsersByIds(MySqlConnection connection, List<int> ids)
         {
             List<User> users = new List<User>();
+            if (ids.Count == 0) return users;
 
             string idsString = string.Join(",", ids);
 
@@ -126,13 +127,12 @@ namespace DENMAP_SERVER.Repository
                 {
                     while (reader.Read())
                     {
-                        byte[] image = (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null;
 
                         User user = new User(
                             Convert.ToInt32(reader["id"]),
                             Convert.ToString(reader["name"]),
                             Convert.ToString(reader["password"]),
-                            image,
+                            Convert.ToString(reader["image"]),
                             Convert.ToDouble(reader["rating"]),
                             Convert.ToString(reader["description"])
                         );
@@ -144,6 +144,22 @@ namespace DENMAP_SERVER.Repository
             return users;
         }
 
+        public int updateUserRating(MySqlConnection connection, int id, double rating)
+        {
+            string query = $"UPDATE users " +
+                           $"SET rating = @rating " +
+                           $"WHERE id = @Id";
+
+            int result = 0;
+            using (MySqlCommand cmd = new MySqlCommand(query, connection))
+            {
+                cmd.Parameters.AddWithValue("@rating", rating);
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                result = cmd.ExecuteNonQuery();
+            }
+            return result;
+        }
     }
 }
 

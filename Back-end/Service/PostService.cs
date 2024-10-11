@@ -1,4 +1,4 @@
-﻿using DENMAP_SERVER.Entity;
+using DENMAP_SERVER.Entity;
 using DENMAP_SERVER.Repository;
 using MySql.Data.MySqlClient;
 using System;
@@ -14,8 +14,9 @@ namespace DENMAP_SERVER.Service
         string connectionString = "Server=34.116.253.154;Port=3306;Database=chat_database;Uid=app_user;Pwd=&X9fT#7vYqZ$4LpR;";
 
         private PostRepository postRepository = new PostRepository();
+        private CommentRepository commentRepository = new CommentRepository();
 
-        public int AddPost(int userId, string title, byte[] image, string content)
+        public int AddPost(int userId, string title, string image, string content)
         {
             int id = 0;
             Post post = null;
@@ -100,12 +101,13 @@ namespace DENMAP_SERVER.Service
             return posts;
         }
 
-        public int UpdatePost(int id, int userId, string title, byte[] image, string content, double rating, DateTime createdAt)
+        public int UpdatePost(int id, int userId, string title, string image, string content, double rating, DateTime createdAt)
         {
             int result = 0;
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
+                connection.Open();
                 try
                 {
                     result = postRepository.updatePost(connection, id, userId, title, image, content, rating, createdAt);
@@ -125,6 +127,7 @@ namespace DENMAP_SERVER.Service
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
+                connection.Open();
                 try
                 {
                     result = postRepository.updatePostRating(connection, id, rating);
@@ -136,6 +139,53 @@ namespace DENMAP_SERVER.Service
             }
 
             return result;
+        }
+
+        public double GetPostRating(int id)
+        {
+            double rating = 0;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                try
+                {
+                    rating = postRepository.getPostRating(connection, id);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Database error.\nError:" + ex.Message);
+                }
+            }
+
+            return rating;
+        }
+
+        public void ReCalculatePostRating(int id)
+        {
+            double rating = 0;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                try
+                {
+                    List<Comment> comments = commentRepository.getCommentsByPostID(connection, id);
+                    foreach (Comment comment in comments)
+                    {
+                        rating += comment.Rating;
+                    }
+                    rating /= comments.Count;
+
+                    
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Database error.\nError:" + ex.Message);
+                }
+            }
+
+            UpdatePostRating(id, rating); ;
         }
     }
 }

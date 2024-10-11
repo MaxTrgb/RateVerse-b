@@ -7,7 +7,7 @@ namespace DENMAP_SERVER
     {
         static void Main(string[] args)
         {
-            var uri = new Uri("http://localhost:1234");
+            var uri = new Uri("http://localhost:80");
 
             using (var host = new NancyHost(uri))
             {
