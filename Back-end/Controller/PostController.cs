@@ -1,3 +1,4 @@
+
 using DENMAP_SERVER.Entity.dto;
 using DENMAP_SERVER.Entity;
 using DENMAP_SERVER.Service;
@@ -8,50 +9,52 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nancy.ModelBinding;
+using DENMAP_SERVER.Controller.request;
+
 
 namespace DENMAP_SERVER.Controller
 {
-    internal class PostController : NancyModule
+    public class PostController : NancyModule
     {
         private UserService _userService = new UserService();
         private PostService _postService = new PostService();
         private CommentService _commentService = new CommentService();
 
-        private readonly string _basePath = "/post";
-
-        public PostController()
+        private readonly string _basePath = "/api/v1/post";
+        private Response GetAllPosts()
         {
-            Get(_basePath + "/", _ => 
+            try
             {
+                List<Post> posts = _postService.GetAllPosts();
+                List<int> userIds = posts.Select(x => x.UserId).ToList();
 
-                try
+                List<User> users = _userService.GetUsersByIds(userIds);
+
+                List<PostDTO> postsDTO = new List<PostDTO>();
+
+                Dictionary<int, Post> userPosts = new Dictionary<int, Post>();
+                posts.ForEach(x => userPosts.Add(x.UserId, x));
+
+                foreach (Post post in posts)
                 {
-                    List<Post> posts = _postService.GetAllPosts();
-                    List<int> userIds = posts.Select(x => x.UserId).ToList();
-
-                    List<User> users = _userService.GetUsersByIds(userIds);
-
-                    List<PostDTO> postsDTO = new List<PostDTO>();
-
-                    Dictionary<int, Post> userPosts = new Dictionary<int, Post>();
-                    posts.ForEach(x => userPosts.Add(x.UserId, x));
-
-                    foreach (Post post in posts)
+                    if (userPosts.ContainsKey(post.UserId))
                     {
-                        if (userPosts.ContainsKey(post.UserId))
-                        {
-                            postsDTO.Add(new PostDTO(post, users.Find(x => x.Id == post.UserId)));
-                        }
-
+                        postsDTO.Add(new PostDTO(post, users.Find(x => x.Id == post.UserId)));
                     }
 
-                    return Response.AsJson(postsDTO);
                 }
-                catch (Exception ex)
-                {
-                    return Response.AsJson(new { message = ex.Message }, HttpStatusCode.NotFound);
-                }
-            });
+
+                return Response.AsJson(postsDTO);
+            }
+            catch (Exception ex)
+            {
+                return Response.AsJson(new { message = ex.Message }, HttpStatusCode.NotFound);
+            }
+        }
+        public PostController()
+        {
+            
+
 
 
             Get(_basePath + "/{id}", parameters =>
@@ -63,25 +66,30 @@ namespace DENMAP_SERVER.Controller
                     Post post = _postService.GetPostById(id);
                     if (post == null)
                         return Response.AsJson(new { message = "Post with id " + id + " not found" }, HttpStatusCode.NotFound);
+                    Console.WriteLine("post: " + post);
 
                     User user = _userService.GetUserById(post.UserId);
                     if (user == null)
                         return Response.AsJson(new { message = "User with id " + post.UserId + " not found" }, HttpStatusCode.NotFound);
+                    Console.WriteLine("user: " + user);
 
                     List<Comment> comments = _commentService.GetCommentsByPostId(id);
+                    Console.WriteLine("comments: " + comments);
 
                     List<User> commentUsers = new List<User>();
                     if (comments != null)
                         commentUsers = _userService.GetUsersByIds(comments.Select(x => x.UserId).ToList());
 
-                    Dictionary<int, Comment> userCommentsMap = new Dictionary<int, Comment>();
-                    if (comments != null)
-                        comments.ForEach(x => userCommentsMap.Add(x.UserId, x));
+
 
                     List<CommentDTO> commentDTOs = new List<CommentDTO>();
 
                     foreach (Comment comment in comments)
+                    {
+
                         commentDTOs.Add(new CommentDTO(comment, commentUsers.Find(x => x.Id == comment.UserId)));
+
+                    }
 
 
                     PostDTO postDTO = new PostDTO(post, user, commentDTOs);
@@ -96,17 +104,13 @@ namespace DENMAP_SERVER.Controller
 
             Post(_basePath + "/", args =>
             {
-                int userId;
-                string title;
-                byte[] image;
-                string content;
+
+
+                PostRequest request = null;
 
                 try
                 {
-                    userId = this.Bind<int>("userId");
-                    title = this.Bind<string>("title");
-                    image = this.Bind<byte[]>("image");
-                    content = this.Bind<string>("content");
+                    request = this.Bind<PostRequest>();
                 }
                 catch (Exception e)
                 {
@@ -115,7 +119,7 @@ namespace DENMAP_SERVER.Controller
 
                 try
                 {
-                    int postId = _postService.AddPost(userId, title, image, content);
+                    int postId = _postService.AddPost(request.userId, request.title, request.image, request.content);
                     return Response.AsJson(new { message = postId }, HttpStatusCode.Created);
                 }
                 catch (Exception e)
@@ -127,24 +131,34 @@ namespace DENMAP_SERVER.Controller
             Get(_basePath + "/", args =>
             {
                 int? id = (int?)this.Request.Query["userId"];
-
-                if (!id.HasValue)
-                    return Response.AsJson(new { message = "Missing id parameter" }, HttpStatusCode.BadRequest);
-
-                List<Post> posts = _postService.GetPostsByUserId(id.Value);
-                if (posts != null)
-                    return Response.AsJson(new { message = "Posts not found" }, HttpStatusCode.NotFound);
-
-                User user = _userService.GetUserById(posts[0].UserId);
-                if (user != null)
-                    return Response.AsJson(new { message = "User not found" }, HttpStatusCode.NotFound);
-
                 List<PostDTO> postDTOs = new List<PostDTO>();
+                List<Post> posts = new List<Post>();
+                User user = null;
 
-                foreach (Post post in posts)
-                    postDTOs.Add(new PostDTO(post, user));
+                try
+                {
+                    if (!id.HasValue)
+                        return GetAllPosts();
 
-                return Response.AsJson(user);
+                    posts = _postService.GetPostsByUserId(id.Value);
+                    if (posts == null)
+                        return Response.AsJson(new { message = "Posts not found" }, HttpStatusCode.NotFound);
+
+                    user = _userService.GetUserById(posts[0].UserId);
+                    if (user == null)
+                        return Response.AsJson(new { message = "User not found" }, HttpStatusCode.NotFound);
+
+
+                    foreach (Post post in posts)
+                        postDTOs.Add(new PostDTO(post, user));
+
+                }
+                catch (Exception e)
+                {
+                    return Response.AsJson(new { message = e.Message }, HttpStatusCode.InternalServerError);
+                }
+
+                return Response.AsJson(postDTOs);
             });
         }
     }

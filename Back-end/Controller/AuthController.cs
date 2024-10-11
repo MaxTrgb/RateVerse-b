@@ -8,10 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nancy.ModelBinding;
+using DENMAP_SERVER.Controller.request;
 
 namespace DENMAP_SERVER.Controller
 {
-    internal class AuthController : NancyModule
+    public class AuthController : NancyModule
     {
         private UserService _userService = new UserService();
 
@@ -21,44 +22,39 @@ namespace DENMAP_SERVER.Controller
         {
             Post(_basePath + "/register", args =>
             {
-                string name;
-                string password;
-                byte[] image;
-                string description;
+
+                AuthRequest request = null;
 
                 try
                 {
-                    name = this.Bind<string>("name");
-                    password = this.Bind<string>("password");
-                    image = this.Bind<byte[]>("image");
-                    description = this.Bind<string>("description");
+                    Console.WriteLine("start binding parameters");
+                   request = this.Bind<AuthRequest>();
+                    Console.WriteLine(request);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     return Response.AsJson(new { message = e.Message }, HttpStatusCode.BadRequest);
                 }
 
                 try
                 {
-                    int userId = _userService.RegisterUser(name, password, image, description);
+                    int userId = _userService.RegisterUser(request.Name, request.Password, request.Image, request.Description);
                     return Response.AsJson(new { message = userId }, HttpStatusCode.Created);
                 }
                 catch (Exception e)
                 {
                     return Response.AsJson(new { message = e.Message }, HttpStatusCode.BadRequest);
                 }
-                
+
             });
 
             Post(_basePath + "/login", args =>
             {
-                string name;
-                string password;
+                AuthRequest request = null;
 
                 try
                 {
-                    name = this.Bind<string>("name");
-                    password = this.Bind<string>("password");
+                   request = this.Bind<AuthRequest>();
                 }
                 catch (Exception e)
                 {
@@ -67,7 +63,7 @@ namespace DENMAP_SERVER.Controller
 
                 try
                 {
-                    int userId = _userService.loginUser(name, password);
+                    int userId = _userService.loginUser(request.Name, request.Password);
                     return Response.AsJson(new { message = userId }, HttpStatusCode.OK);
                 }
                 catch (Exception e)

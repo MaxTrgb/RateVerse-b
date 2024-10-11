@@ -14,9 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DENMAP_SERVER")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cf82f44f576553c2cdcaffbbc01e35f3214295dc")]
-
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+75d3475bb73c671d5c7f23eb46826027a28cdd19")]
 [assembly: System.Reflection.AssemblyProductAttribute("DENMAP_SERVER")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DENMAP_SERVER")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

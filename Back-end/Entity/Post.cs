@@ -11,12 +11,12 @@ namespace DENMAP_SERVER.Entity
         public int Id { get; set; }
         public int UserId { get; set; }
         public string Title { get; set; }
-        public byte[] Image { get; set; }
+        public string Image { get; set; }
         public string Content { get; set; }
         public double Rating { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public Post(int id, int user, string title, byte[] image, string content, double rating, DateTime createdAt)
+        public Post(int id, int user, string title, string image, string content, double rating, DateTime createdAt)
         {
             Id = id;
             UserId = user;
