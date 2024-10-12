@@ -45,7 +45,7 @@ namespace DENMAP_SERVER.Entity.dto
             Id = post.Id;
             User = user;
             Title = post.Title;
-            Image = post.Content;
+            Image = post.Image;
             Content = post.Content;
             Rating = post.Rating;
             Comments = new List<CommentDTO>();
