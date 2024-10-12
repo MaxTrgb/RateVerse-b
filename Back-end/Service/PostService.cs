@@ -181,5 +181,26 @@ namespace DENMAP_SERVER.Service
 
             UpdatePostRating(id, rating); ;
         }
+
+        public List<Post> GetPostsByGenreId(int genreId)
+        {
+            List<Post> posts = null;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                try
+                {
+                    posts = postRepository.getPostsByGenreID(connection, genreId);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Database error.\nError:" + ex.Message);
+                }
+            }
+
+            return posts;
+        }
     }
 }

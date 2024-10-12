@@ -201,5 +201,38 @@ namespace DENMAP_SERVER.Repository
             }
             return rating;
         }
+
+        public List<Post> getPostsByGenreID(MySqlConnection connection, int genreId)
+        {
+            List<Post> posts = new List<Post>();
+            string query = $"SELECT * " +
+                           $"FROM posts " +
+                           $"WHERE genre_id = @genreId";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, connection))
+            {
+                cmd.Parameters.AddWithValue("@genreId", genreId);
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Post post = new Post(
+                            Convert.ToInt32(reader["id"]),
+                            Convert.ToInt32(reader["user_id"]),
+                            Convert.ToString(reader["title"]),
+                            Convert.ToString(reader["image"]),
+                            Convert.ToString(reader["content"]),
+                            Convert.ToDouble(reader["rating"]),
+                            Convert.ToDateTime(reader["created_at"]),
+                            Convert.ToInt32(reader["genre_id"])
+                        );
+
+                        posts.Add(post);
+                    }
+                }
+            }
+            return posts;
+        }
     }
 }
