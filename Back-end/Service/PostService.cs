@@ -1,11 +1,6 @@
 using DENMAP_SERVER.Entity;
 using DENMAP_SERVER.Repository;
 using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DENMAP_SERVER.Service
 {
@@ -16,10 +11,9 @@ namespace DENMAP_SERVER.Service
         private PostRepository postRepository = new PostRepository();
         private CommentRepository commentRepository = new CommentRepository();
 
-        public int AddPost(int userId, string title, string image, string content)
+        public int AddPost(int userId, string title, string image, string content, int genreId)
         {
             int id = 0;
-            Post post = null;
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -27,7 +21,7 @@ namespace DENMAP_SERVER.Service
 
                 try
                 {
-                    id = postRepository.addPost(connection, userId, title, image, content, 0, DateTime.Now);
+                    id = postRepository.addPost(connection, userId, title, image, content, 0, DateTime.Now, genreId);
                 }
                 catch (Exception ex)
                 {

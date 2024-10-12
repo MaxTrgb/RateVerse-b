@@ -16,6 +16,7 @@ namespace DENMAP_SERVER.Entity.dto
         public double Rating { get; set; }
         public List<CommentDTO> Comments { get; set; }
         public DateTime CreatedAt { get; set; }
+        public Genre Genre { get; set; }
 
         public PostDTO(int id, User user, string title, string image, string content, double rating, List<CommentDTO> comments, DateTime createdAt)
         {
@@ -29,7 +30,7 @@ namespace DENMAP_SERVER.Entity.dto
             CreatedAt = createdAt;
         }
 
-        public PostDTO(Post post, User user, List<CommentDTO> comments)
+        public PostDTO(Post post, User user, List<CommentDTO> comments, Genre genre)
         {
             Id = post.Id;
             User = user;
@@ -39,8 +40,9 @@ namespace DENMAP_SERVER.Entity.dto
             Rating = post.Rating;
             Comments = comments;
             CreatedAt = post.CreatedAt;
+            Genre = genre;
         }
-        public PostDTO(Post post, User user)
+        public PostDTO(Post post, User user, Genre genre)
         {
             Id = post.Id;
             User = user;
@@ -50,6 +52,7 @@ namespace DENMAP_SERVER.Entity.dto
             Rating = post.Rating;
             Comments = new List<CommentDTO>();
             CreatedAt = post.CreatedAt;
+            Genre = genre;
         }
     }
 }
