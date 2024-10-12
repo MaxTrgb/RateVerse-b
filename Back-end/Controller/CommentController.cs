@@ -44,13 +44,14 @@ namespace DENMAP_SERVER.Controller
                         users = _userService.GetUsersByIds(comments.Select(x => x.UserId).ToList());
 
                     Console.WriteLine("users: " + users.Count);
-                    Dictionary<int, User> userDict = new Dictionary<int, User>();
-                    comments.ForEach(x => userDict.Add(x.UserId, users.Find(y => y.Id == x.UserId)));
-                    Console.WriteLine("userDict: " + userDict.Count);
+                    //Dictionary<int, User> userDict = new Dictionary<int, User>();
+                    //comments.ForEach(x => userDict.Add(x.UserId, users.Find(y => y.Id == x.UserId)));
+
+                    //Console.WriteLine("userDict: " + userDict.Count);
                     List<CommentDTO> commentsDTO = new List<CommentDTO>();
                     Console.WriteLine("commentsDTO: " + commentsDTO.Count);
                     foreach (Comment comment in comments)
-                        commentsDTO.Add(new CommentDTO(comment, userDict[comment.UserId]));
+                        commentsDTO.Add(new CommentDTO(comment, users.Find(x => x.Id == comment.UserId)));
                     Console.WriteLine("commentsDTO: " + commentsDTO.Count);
                     return Response.AsJson(commentsDTO);
 
