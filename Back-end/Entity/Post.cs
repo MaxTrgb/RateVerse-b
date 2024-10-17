@@ -15,8 +15,9 @@ namespace DENMAP_SERVER.Entity
         public string Content { get; set; }
         public double Rating { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int GenreId { get; set; }
 
-        public Post(int id, int user, string title, string image, string content, double rating, DateTime createdAt)
+        public Post(int id, int user, string title, string image, string content, double rating, DateTime createdAt, int genreId)
         {
             Id = id;
             UserId = user;
@@ -25,6 +26,7 @@ namespace DENMAP_SERVER.Entity
             Content = content;
             Rating = rating;
             CreatedAt = createdAt;
+            GenreId = genreId;
         }
     }
 }

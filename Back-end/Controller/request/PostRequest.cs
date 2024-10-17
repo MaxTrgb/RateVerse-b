@@ -12,5 +12,6 @@ namespace DENMAP_SERVER.Controller.request
         public string title { get; set; }
         public string image { get; set; }
         public string content { get; set; }
+        public int genreId { get; set; }
     }
 }

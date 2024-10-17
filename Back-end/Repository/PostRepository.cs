@@ -10,9 +10,9 @@ namespace DENMAP_SERVER.Repository
 {
     internal class PostRepository
     {
-        public int addPost(MySqlConnection connection, int userId, string title, string image, string content, double rating, DateTime createdAt)
+        public int addPost(MySqlConnection connection, int userId, string title, string image, string content, double rating, DateTime createdAt, int genreId)
         {
-            string query = $"INSERT INTO posts (user_id, title, image, content, rating, created_at) VALUES (@userId, @title, @image, @content, @rating, @createdAt); SELECT LAST_INSERT_ID();";
+            string query = $"INSERT INTO posts (user_id, title, image, content, rating, created_at, genre_id) VALUES (@userId, @title, @image, @content, @rating, @createdAt, @genreId); SELECT LAST_INSERT_ID();";
             int id = 0;
             using (MySqlCommand cmd = new MySqlCommand(query, connection))
             {
@@ -22,6 +22,7 @@ namespace DENMAP_SERVER.Repository
                 cmd.Parameters.AddWithValue("@content", content);
                 cmd.Parameters.AddWithValue("@rating", rating);
                 cmd.Parameters.AddWithValue("@createdAt", createdAt);
+                cmd.Parameters.AddWithValue("@genreId", genreId);
                 id = Convert.ToInt32(cmd.ExecuteScalar());
             }
             return id;
@@ -50,7 +51,8 @@ namespace DENMAP_SERVER.Repository
                             Convert.ToString(reader["image"]),
                             Convert.ToString(reader["content"]),
                             Convert.ToDouble(reader["rating"]),
-                            Convert.ToDateTime(reader["created_at"])
+                            Convert.ToDateTime(reader["created_at"]),
+                            Convert.ToInt32(reader["genre_id"])
                         );
 
                         posts.Add(post);
@@ -58,7 +60,7 @@ namespace DENMAP_SERVER.Repository
                 }
             }
             Console.WriteLine(posts.Count);
-            Console.WriteLine(posts[0].ToString());
+
             return posts;
         }
 
@@ -84,7 +86,8 @@ namespace DENMAP_SERVER.Repository
                             Convert.ToString(reader["image"]),
                             Convert.ToString(reader["content"]),
                             Convert.ToDouble(reader["rating"]),
-                            Convert.ToDateTime(reader["created_at"])
+                            Convert.ToDateTime(reader["created_at"]),
+                            Convert.ToInt32(reader["genre_id"])
                         );
                         Console.WriteLine("id:" + Convert.ToInt32(reader["id"]) +
                             " user_id: " + Convert.ToInt32(reader["user_id"]) +
@@ -120,7 +123,8 @@ namespace DENMAP_SERVER.Repository
                             Convert.ToString(reader["image"]),
                             Convert.ToString(reader["content"]),
                             Convert.ToDouble(reader["rating"]),
-                            Convert.ToDateTime(reader["created_at"])
+                            Convert.ToDateTime(reader["created_at"]),
+                            Convert.ToInt32(reader["genre_id"])
                         );
 
                         posts.Add(post);
@@ -196,6 +200,39 @@ namespace DENMAP_SERVER.Repository
                 }
             }
             return rating;
+        }
+
+        public List<Post> getPostsByGenreID(MySqlConnection connection, int genreId)
+        {
+            List<Post> posts = new List<Post>();
+            string query = $"SELECT * " +
+                           $"FROM posts " +
+                           $"WHERE genre_id = @genreId";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, connection))
+            {
+                cmd.Parameters.AddWithValue("@genreId", genreId);
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Post post = new Post(
+                            Convert.ToInt32(reader["id"]),
+                            Convert.ToInt32(reader["user_id"]),
+                            Convert.ToString(reader["title"]),
+                            Convert.ToString(reader["image"]),
+                            Convert.ToString(reader["content"]),
+                            Convert.ToDouble(reader["rating"]),
+                            Convert.ToDateTime(reader["created_at"]),
+                            Convert.ToInt32(reader["genre_id"])
+                        );
+
+                        posts.Add(post);
+                    }
+                }
+            }
+            return posts;
         }
     }
 }
