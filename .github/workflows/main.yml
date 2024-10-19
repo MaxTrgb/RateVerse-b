@@ -2,8 +2,9 @@ name: Build and Copy to Server
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -11,12 +12,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '7.0.x'
+          dotnet-version: '8.0.x'
 
       - name: Restore dependencies
         run: dotnet restore Back-end/DENMAP_SERVER.csproj
@@ -31,7 +32,7 @@ jobs:
         run: tar -czvf app.tar.gz -C out .
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: app-artifact
           path: app.tar.gz
@@ -42,7 +43,7 @@ jobs:
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: app-artifact
           path: ./app
@@ -53,14 +54,15 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Copy artifact to server via SCP
-        run: scp -o StrictHostKeyChecking=no ./app/app.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/itstep/app.tar.gz
+        run: scp -o StrictHostKeyChecking=no ./app/app.tar.gz ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/itstep/groupProject/backend/app.tar.gz
 
       - name: SSH into server and extract
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-          cd /home/itstep
+          cd /home/itstep/groupProject/backend
           tar -xzvf app.tar.gz
-          cd out
-          docker build -t server-app .
-          docker run -d -p 80:80 server-app
+          rm app.tar.gz
+          cd ..
+          docker compose down --rmi all
+          docker compose up -d --build
           EOF
