@@ -112,9 +112,6 @@ namespace DENMAP_SERVER.Controller
                 try
                 {
                     int commentId = _commentService.AddComment(request.userId, request.rating, request.message, request.postId);
-
-                    _postService.ReCalculatePostRating(request.postId);
-                    _userService.ReCalculateUserRating(post.UserId);
                     return Response.AsJson(new { message = request.postId }, HttpStatusCode.Created);
                 }
                 catch (Exception e)
@@ -176,9 +173,6 @@ namespace DENMAP_SERVER.Controller
                 {
                     return Response.AsJson(new { message = e.Message }, HttpStatusCode.BadRequest);
                 }
-
-                _postService.ReCalculatePostRating(post.Id);
-                _userService.ReCalculateUserRating(post.UserId);
 
                 return Response.AsJson(new { message = "Comment deleted" }, HttpStatusCode.OK);
             });
