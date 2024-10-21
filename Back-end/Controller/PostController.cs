@@ -15,6 +15,7 @@ namespace DENMAP_SERVER.Controller
         private PostService _postService = new PostService();
         private CommentService _commentService = new CommentService();
         private GenreService _genreService = new GenreService();
+        private PostRateService _postRateService = new PostRateService();
 
         private const string _BASE_PATH = "/api/v1/post";
 
@@ -282,6 +283,81 @@ namespace DENMAP_SERVER.Controller
 
                 return Response.AsJson(new { message = "Post deleted successfully" }, HttpStatusCode.OK);
             });
+
+            Get(_BASE_PATH + "/rate/{id}", parameters =>
+            {
+                int postIdFromUrl = parameters.id;
+
+                int? userId = (int?)this.Request.Query["userId"];
+                double? rating = (double?)this.Request.Query["rating"];
+
+                if (!userId.HasValue)
+                {
+                    return Response.AsJson(new { message = "Missing userId parameter" }, HttpStatusCode.BadRequest);
+                }
+
+                Post post = null;
+                try
+                {
+                    post = _postService.GetPostById(postIdFromUrl);
+                }
+                catch
+                {
+                    return Response.AsJson(new { message = "Post not found" }, HttpStatusCode.NotFound);
+                }
+
+                if (!rating.HasValue)
+                {
+                    return GetPersonalPostRate(postIdFromUrl, userId.Value);
+                }
+
+                try
+                {
+                    PostRate postRate = _postRateService.GetPostRateByUserIDAndPostID(userId.Value, postIdFromUrl);
+
+                    if (postRate != null)
+                    {
+                        return Response.AsJson(new { message = "You already rated this post" }, HttpStatusCode.NotFound);
+                    }
+                }
+                catch(Exception e)
+                {
+                    return Response.AsJson(new { message = e.Message }, HttpStatusCode.BadRequest);
+                }
+
+                try
+                {
+                    
+                    _postRateService.AddPostRate(postIdFromUrl, userId.Value, rating.Value);
+                    _postService.ReCalculatePostRating(postIdFromUrl);
+                    _userService.ReCalculateUserRating(post.UserId);
+
+                    return Response.AsJson(new { message = "Post rating updated successfully" }, HttpStatusCode.OK);
+                }
+                catch (Exception e)
+                {
+                    return Response.AsJson(new { message = e.Message }, HttpStatusCode.BadRequest);
+                }
+            });
+        }
+
+        private Response GetPersonalPostRate(int postId, int userId)
+        {
+            try
+            {
+                PostRate postRate = _postRateService.GetPostRateByUserIDAndPostID(userId, postId);
+
+                if (postRate == null)
+                {
+                    return Response.AsJson(new { message = "You have not rated this post" }, HttpStatusCode.NotFound);
+                }
+
+                return Response.AsJson(new { postRate = postRate.Rating });
+            }
+            catch (Exception e)
+            {
+                return Response.AsJson(new { message = e.Message }, HttpStatusCode.BadRequest);
+            }
         }
 
         private Response GetPostsByGenreId(int id)

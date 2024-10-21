@@ -10,6 +10,7 @@ namespace DENMAP_SERVER.Service
 
         private PostRepository postRepository = new PostRepository();
         private CommentRepository commentRepository = new CommentRepository();
+        private PostRatesRepository postRatesRepository = new PostRatesRepository();
 
         public int AddPost(int userId, string title, string image, string content, int genreId)
         {
@@ -171,12 +172,12 @@ namespace DENMAP_SERVER.Service
                 connection.Open();
                 try
                 {
-                    List<Comment> comments = commentRepository.getCommentsByPostID(connection, id);
-                    foreach (Comment comment in comments)
+                    List<PostRate> postRates = postRatesRepository.getPostRatesByPostID(connection, id);
+                    foreach (PostRate postRate in postRates)
                     {
-                        rating += comment.Rating;
+                        rating += postRate.Rating;
                     }
-                    rating /= comments.Count;
+                    rating /= postRates.Count;
 
                     
                 }
