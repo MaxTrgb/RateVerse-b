@@ -1,10 +1,11 @@
-
 using DENMAP_SERVER.Entity.dto;
 using DENMAP_SERVER.Entity;
 using DENMAP_SERVER.Service;
 using Nancy;
 using Nancy.ModelBinding;
 using DENMAP_SERVER.Controller.request;
+using System.Text;
+using System.Security.Cryptography;
 
 
 namespace DENMAP_SERVER.Controller
@@ -16,8 +17,10 @@ namespace DENMAP_SERVER.Controller
         private CommentService _commentService = new CommentService();
         private GenreService _genreService = new GenreService();
         private PostRateService _postRateService = new PostRateService();
+        private MediaService _mediaService = new MediaService();
 
         private const string _BASE_PATH = "/api/v1/post";
+        private const string _BASE_PATH_MEDIA = "http://34.116.253.154/media/";
 
         public PostController()
         {
@@ -91,7 +94,7 @@ namespace DENMAP_SERVER.Controller
                 }
             });
 
-            Post(_BASE_PATH + "/", args =>
+            Post(_BASE_PATH + "/", async args =>
             {
                 PostRequest request = null;
 
@@ -114,9 +117,34 @@ namespace DENMAP_SERVER.Controller
                     return Response.AsJson(new { message = e.Message }, HttpStatusCode.BadRequest);
                 }
 
+
+                var file = Request.Files.FirstOrDefault();
+
+                if (file == null)
+                {
+                    return Response.AsJson(new { message = "File not found" }, HttpStatusCode.BadRequest);
+                }
+
+                string hashedFileName = GenerateHash(file.Name) + Path.GetExtension(file.Name);
+                var tempFilePath = Path.Combine(Path.GetTempPath(), hashedFileName);
+
+                using (var fileStream = File.Create(tempFilePath))
+                {
+                    await file.Value.CopyToAsync(fileStream);
+                }
+
+                await _mediaService.PutObjectAsync("mybucket", hashedFileName, tempFilePath, file.ContentType);
+
+                //if (File.Exists(tempFilePath))
+                //{
+                //    await Task.Delay(100);
+                //    File.Delete(tempFilePath);
+                //}
+
                 try
                 {
-                    int postId = _postService.AddPost(request.userId, request.title, request.image, request.content, request.genreId);
+                    int postId = _postService.AddPost(request.userId, request.title, _BASE_PATH_MEDIA + hashedFileName, 
+                        request.content, request.genreId);
                     return Response.AsJson(new { message = postId }, HttpStatusCode.Created);
                 }
                 catch (Exception e)
@@ -178,7 +206,7 @@ namespace DENMAP_SERVER.Controller
             });
 
 
-            Put(_BASE_PATH + "/{id}", parameters =>
+            Put(_BASE_PATH + "/{id}", async parameters =>
             {
                 int postIdFromUrl = parameters.id;
 
@@ -218,10 +246,32 @@ namespace DENMAP_SERVER.Controller
                     return Response.AsJson(new { message = "You have no permission to edit this post" }, HttpStatusCode.Unauthorized);
                 }
 
+                string hashedFileName = null;
+                if (request.image == null)
+                {
+                    var file = Request.Files.FirstOrDefault();
+
+                    if (file == null)
+                    {
+                        return Response.AsJson(new { message = "File not found" }, HttpStatusCode.BadRequest);
+                    }
+
+                    hashedFileName = GenerateHash(file.Name) + Path.GetExtension(file.Name);
+                    var tempFilePath = Path.Combine(Path.GetTempPath(), hashedFileName);
+
+                    using (var fileStream = File.Create(tempFilePath))
+                    {
+                        await file.Value.CopyToAsync(fileStream);
+                    }
+
+                    await _mediaService.PutObjectAsync("mybucket", hashedFileName, tempFilePath, file.ContentType);
+                }
 
                 try
                 {
-                    int postId = _postService.UpdatePost(postIdFromUrl, request.title, request.image, request.content, request.genreId);
+                    int postId = _postService.UpdatePost(postIdFromUrl, request.title, 
+                        request.image != null ? request.image : _BASE_PATH_MEDIA + hashedFileName, 
+                        request.content, request.genreId);
                     return Response.AsJson(new { message = postId }, HttpStatusCode.OK);
                 }
                 catch (Exception e)
@@ -414,6 +464,16 @@ namespace DENMAP_SERVER.Controller
             catch (Exception ex)
             {
                 return Response.AsJson(new { message = ex.Message }, HttpStatusCode.NotFound);
+            }
+        }
+
+        private string GenerateHash(string fileName)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var bytes = Encoding.UTF8.GetBytes(fileName);
+                var hash = sha256.ComputeHash(bytes);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
             }
         }
     }
