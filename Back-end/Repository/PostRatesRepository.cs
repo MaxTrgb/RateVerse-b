@@ -79,5 +79,32 @@ namespace DENMAP_SERVER.Repository
 
             return postRates;
         }
+
+        public List<PostRate> getPostRatesByUserPostIDs(DbConnection connection, int userId)
+        {
+            string query = $"SELECT * FROM post_rates WHERE post_id IN (SELECT id FROM posts WHERE user_id = {userId})";
+
+            List<PostRate> postRates = new List<PostRate>();
+            using (MySqlCommand cmd = new MySqlCommand(query, (MySqlConnection)connection))
+            {
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        PostRate postRate = new PostRate(
+                            Convert.ToInt32(reader["id"]),
+                            Convert.ToInt32(reader["user_id"]),
+                            Convert.ToDouble(reader["rating"]),
+                            Convert.ToInt32(reader["post_id"]),
+                            Convert.ToDateTime(reader["created_at"])
+                        );
+
+                        postRates.Add(postRate);
+                    }
+                }
+            }
+
+            return postRates;
+        }
     }
 }
